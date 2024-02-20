@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 // import { i } from "vite/dist/node/types.d-jgA8ss1A";
 // import { useCallback } from "react";
@@ -10,29 +10,34 @@ function App() {
   const [char, setChar] = useState(false);
   const [num, setNum] = useState(false);
 
-  const passGenerator = useCallback(()=>{
+  const passGenerator = useCallback(() => {
+    let pass = "";
+    let str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    let pass = ""
-    let str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    if (char) str += ":!#$%&'()*+,-./:;<=>?@[]^_`{|}~";
+    if (num) str += "0123456789";
 
-    if(char) str+=":!#$%&'()*+,-./:;<=>?@[\]^_`{|}~";
-    if(num) str+="0123456789";
-
-    for( let i=1 ; i<=range; i++){
-      let random = parseInt(Math.random() * str.length + 1)
-      pass += str.charAt(random)
+    for (let i = 1; i <= range; i++) {
+      let random = parseInt(Math.random() * str.length + 1);
+      pass += str.charAt(random);
     }
 
-    setPassword(pass)
+    setPassword(pass);
 
     console.log(pass);
+  }, [char, num, range, setPassword]);
 
-  } , [char , num , range , setPassword])
+  const copyText = useCallback(()=>{
+    passRef.current?.select()
+    window.navigator.clipboard.writeText(password);
+  } , [password]) 
+   
+  
 
-  useEffect(()=>{
-    passGenerator()
-  } , [char  , num , range])
-
+  const passRef = useRef(null)
+  useEffect(() => {
+    passGenerator();
+  }, [char, num, range]);
 
   return (
     <>
@@ -47,12 +52,15 @@ function App() {
                 className="text-black border-black h-10 pl-3 w-96 rounded-lg border-2"
                 type="text"
                 value={password}
+                ref={passRef}
               />
             </div>
             <div>
-              <button onClick={passGenerator} className=" bg-blue-500 p-2 rounded-md w-[6rem] font-sans text-white">
-                
-                Generate
+              <button
+                onClick={copyText}
+                className=" bg-blue-500 p-2 rounded-md w-[6rem] font-sans text-white"
+              >
+                Copy
               </button>
             </div>
           </div>
@@ -76,21 +84,24 @@ function App() {
               <input
                 type="checkbox"
                 defaultChecked={char}
-                onChange={()=>{
-                    setChar((prev)=> !prev)
-                    console.log(char);
+                onChange={() => {
+                  setChar((prev) => !prev);
+                  console.log(char);
                 }}
-                
               />
               <label htmlFor="" className="ml-2 text-lg">
                 Characters
               </label>
             </div>
             <div>
-              <input type="checkbox" defaultChecked={num} onChange={()=>{
-                setNum((prev)=> !prev)
-                console.log(num);
-              }}/>
+              <input
+                type="checkbox"
+                defaultChecked={num}
+                onChange={() => {
+                  setNum((prev) => !prev);
+                  console.log(num);
+                }}
+              />
               <label className="ml-2 text-lg" htmlFor="">
                 Numbers
               </label>
